@@ -1,4 +1,15 @@
 import type { FieldDef } from "./fieldRegistry";
+import type { UsageLimitRule } from "./UsageLimitListFieldControl";
+
+function isUsageLimitRule(v: unknown): v is UsageLimitRule {
+  return (
+    typeof v === "object" &&
+    v !== null &&
+    "quota" in v &&
+    "period" in v &&
+    "action" in v
+  );
+}
 
 /**
  * Formats a field's plan value for the table's read-only "Plan Config"
@@ -23,7 +34,30 @@ export function formatDisplayValue(
       return v.length === 0 ? "Allow all countries" : v.join(", ");
     }
   }
+  if (control === "usageLimitList") {
+    // nil and an explicit empty rule list are equivalent -- Limiter.Reserve
+    // (pkg/lib/usage/limit.go) treats len(limits) == 0 as "no limit
+    // enforced" either way, matching UsageLimitListFieldControl's own "No
+    // limit" mode label for the same value.
+    if (v == null) return "No limit";
+    if (Array.isArray(v)) {
+      if (v.length === 0) return "No limit";
+      const lines = v.map((rule) =>
+        isUsageLimitRule(rule)
+          ? `${rule.quota}/${rule.period} (${rule.action})`
+          : String(rule)
+      );
+      // A newline per rule reads far more clearly than a comma-joined run-on
+      // once there's more than one -- see .planValue's white-space: pre-line.
+      return lines.length > 1 ? lines.join("\n") : lines[0];
+    }
+  }
   if (v === undefined || v === null) return "—";
-  if (typeof v === "boolean") return v ? "Enabled" : "Disabled";
+  // "Yes"/"No" rather than "Enabled"/"Disabled": most fields here are
+  // negative-polarity "disabled" flags, where true means the plan disables
+  // the feature -- "Enabled" for true would say the opposite of what the
+  // field means. Yes/No answers the field's label directly regardless of
+  // polarity, matching BooleanFieldControl's own toggle text.
+  if (typeof v === "boolean") return v ? "Yes" : "No";
   return String(v);
 }

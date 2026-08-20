@@ -7,11 +7,13 @@ import type { FieldDef } from "./fieldRegistry";
  * instead of only showing a generic banner.
  *
  * A cause matches a field when `location` is exactly that field's
- * `jsonPointer`, or is an ancestor of it (the failure is on a containing
+ * `jsonPointer`, is an ancestor of it (the failure is on a containing
  * object, e.g. a `required` failure on `/oauth/client` should still flag
- * every known leaf field under it). The empty-string location (failure on
- * the document root) never matches a specific row — it's left for the
- * generic banner.
+ * every known leaf field under it), or is a descendant of it (the failure is
+ * on a nested item within a list-valued field, e.g. an invalid quota at
+ * `/usage/limits/email/0/quota` should still flag the `/usage/limits/email`
+ * row). The empty-string location (failure on the document root) never
+ * matches a specific row — it's left for the generic banner.
  */
 export function mapCausesToFields(
   causes: ValidationErrorCause[],
@@ -25,7 +27,8 @@ export function mapCausesToFields(
     const matches = registry.filter(
       (field) =>
         field.jsonPointer === cause.location ||
-        field.jsonPointer.startsWith(`${cause.location}/`)
+        field.jsonPointer.startsWith(`${cause.location}/`) ||
+        cause.location.startsWith(`${field.jsonPointer}/`)
     );
 
     for (const field of matches) {

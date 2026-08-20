@@ -10,6 +10,9 @@ import { formatDisplayValue } from "./formatDisplayValue";
 import BooleanFieldControl from "./BooleanFieldControl";
 import NumberFieldControl from "./NumberFieldControl";
 import CountryListFieldControl from "./CountryListFieldControl";
+import UsageLimitListFieldControl, {
+  type UsageLimitRule,
+} from "./UsageLimitListFieldControl";
 import styles from "./FeatureConfigTableView.module.css";
 
 export interface FeatureConfigTableViewProps {
@@ -114,6 +117,18 @@ const FeatureConfigTableView: React.VFC<FeatureConfigTableViewProps> =
                   currentValue === undefined
                     ? undefined
                     : (currentValue as string[])
+                }
+                disabled={disabled}
+                onChange={(v) => commit(field, v)}
+              />
+            );
+          case "usageLimitList":
+            return (
+              <UsageLimitListFieldControl
+                value={
+                  currentValue === undefined
+                    ? undefined
+                    : (currentValue as UsageLimitRule[])
                 }
                 disabled={disabled}
                 onChange={(v) => commit(field, v)}

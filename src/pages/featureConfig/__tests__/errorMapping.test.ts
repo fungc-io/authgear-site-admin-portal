@@ -1,5 +1,15 @@
-import { formatValidationCauses } from "../errorMapping";
+import { formatValidationCauses, mapCausesToFields } from "../errorMapping";
 import type { ValidationErrorCause } from "../../../api/types";
+import type { FieldDef } from "../fieldRegistry";
+
+const REGISTRY: FieldDef[] = [
+  { jsonPointer: "/oauth/client/maximum", label: "Maximum", control: "number" },
+  {
+    jsonPointer: "/usage/limits/email",
+    label: "Email usage limit",
+    control: "usageLimitList",
+  },
+];
 
 test("formats a single cause as 'Invalid input at <location>: <kind>'", () => {
   const causes: ValidationErrorCause[] = [
@@ -38,4 +48,42 @@ test("ignores details, only location and kind are shown", () => {
   expect(formatValidationCauses(causes)).toBe(
     "Invalid input at /oauth/client/maximum: type"
   );
+});
+
+test("mapCausesToFields: exact location match", () => {
+  const causes: ValidationErrorCause[] = [
+    { location: "/oauth/client/maximum", kind: "type" },
+  ];
+  const result = mapCausesToFields(causes, REGISTRY);
+  expect(result.get("/oauth/client/maximum")).toEqual(causes);
+});
+
+test("mapCausesToFields: cause on an ancestor object flags every field beneath it", () => {
+  const causes: ValidationErrorCause[] = [
+    { location: "/oauth/client", kind: "required" },
+  ];
+  const result = mapCausesToFields(causes, REGISTRY);
+  expect(result.get("/oauth/client/maximum")).toEqual(causes);
+});
+
+test("mapCausesToFields: cause on a nested list item flags the list-valued field", () => {
+  const causes: ValidationErrorCause[] = [
+    { location: "/usage/limits/email/0/quota", kind: "minimum" },
+  ];
+  const result = mapCausesToFields(causes, REGISTRY);
+  expect(result.get("/usage/limits/email")).toEqual(causes);
+});
+
+test("mapCausesToFields: document-root location matches nothing", () => {
+  const causes: ValidationErrorCause[] = [{ location: "", kind: "required" }];
+  const result = mapCausesToFields(causes, REGISTRY);
+  expect(result.size).toBe(0);
+});
+
+test("mapCausesToFields: unrelated location matches nothing", () => {
+  const causes: ValidationErrorCause[] = [
+    { location: "/collaborator/maximum", kind: "type" },
+  ];
+  const result = mapCausesToFields(causes, REGISTRY);
+  expect(result.size).toBe(0);
 });

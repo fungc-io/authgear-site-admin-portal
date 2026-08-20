@@ -76,6 +76,10 @@
   padding: 2px 7px;
   font-size: 12px;
   font-weight: 600;
+  /* usageLimitList joins multiple rules with "\n" instead of ", " for
+     readability -- without this, the browser would collapse it to a
+     single space like any other whitespace. */
+  white-space: pre-line;
 }
 
 .rowError .tableCellLabel {

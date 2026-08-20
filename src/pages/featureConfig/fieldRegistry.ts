@@ -12,7 +12,11 @@
  * `authgear-server/pkg/lib/config/feature_*.go`.
  */
 
-export type FieldControlKind = "boolean" | "number" | "countryList";
+export type FieldControlKind =
+  | "boolean"
+  | "number"
+  | "countryList"
+  | "usageLimitList";
 
 export interface FieldDef {
   jsonPointer: string;
@@ -22,55 +26,13 @@ export interface FieldDef {
   section?: string;
 }
 
-/**
- * Provider keys from `OAuthSSOProvidersFeatureConfig`
- * (pkg/lib/config/feature_identity.go) — one boolean row per provider at
- * `/identity/oauth/providers/<name>/disabled`.
- */
-const OAUTH_PROVIDERS: ReadonlyArray<{ key: string; label: string }> = [
-  { key: "google", label: "Google" },
-  { key: "facebook", label: "Facebook" },
-  { key: "github", label: "GitHub" },
-  { key: "linkedin", label: "LinkedIn" },
-  { key: "azureadv2", label: "Azure AD v2" },
-  { key: "azureadb2c", label: "Azure AD B2C" },
-  { key: "adfs", label: "ADFS" },
-  { key: "apple", label: "Apple" },
-  { key: "wechat", label: "WeChat" },
-];
-
+// Section order: most frequently adjusted settings first (per project owner).
 export const FIELD_REGISTRY: FieldDef[] = [
-  ...OAUTH_PROVIDERS.map(
-    (provider): FieldDef => ({
-      jsonPointer: `/identity/oauth/providers/${provider.key}/disabled`,
-      label: `Disable ${provider.label} sign-in`,
-      control: "boolean",
-      section: "Identity — OAuth Providers",
-    })
-  ),
   {
     jsonPointer: "/ui/white_labeling/disabled",
     label: "Disable white labeling",
     control: "boolean",
     section: "UI",
-  },
-  {
-    jsonPointer: "/ui/phone_input/allowlist",
-    label: "Phone input country allowlist",
-    control: "countryList",
-    section: "UI",
-  },
-  {
-    jsonPointer: "/oauth/client/maximum",
-    label: "Maximum OAuth clients",
-    control: "number",
-    section: "OAuth Client",
-  },
-  {
-    jsonPointer: "/oauth/client/soft_maximum",
-    label: "Soft maximum OAuth clients",
-    control: "number",
-    section: "OAuth Client",
   },
   {
     jsonPointer: "/oauth/client/custom_ui_enabled",
@@ -85,22 +47,58 @@ export const FIELD_REGISTRY: FieldDef[] = [
     section: "OAuth Client",
   },
   {
-    jsonPointer: "/hook/blocking_handler/maximum",
-    label: "Maximum blocking hook handlers",
+    jsonPointer: "/oauth/client/soft_maximum",
+    label: "Soft maximum OAuth clients",
     control: "number",
-    section: "Hook",
+    section: "OAuth Client",
   },
   {
-    jsonPointer: "/hook/non_blocking_handler/maximum",
-    label: "Maximum non-blocking hook handlers",
+    jsonPointer: "/oauth/client/maximum",
+    label: "Maximum OAuth clients",
     control: "number",
-    section: "Hook",
+    section: "OAuth Client",
   },
   {
-    jsonPointer: "/audit_log/retrieval_days",
-    label: "Audit log retrieval days",
-    control: "number",
-    section: "Audit Log",
+    jsonPointer: "/ui/phone_input/allowlist",
+    label: "Phone input country allowlist",
+    control: "countryList",
+    section: "Phone Input",
+  },
+  {
+    jsonPointer: "/usage/limits/email",
+    label: "Email usage limit",
+    control: "usageLimitList",
+    section: "Usage Limit",
+  },
+  {
+    jsonPointer: "/usage/limits/sms",
+    label: "SMS usage limit",
+    control: "usageLimitList",
+    section: "Usage Limit",
+  },
+  {
+    jsonPointer: "/usage/limits/whatsapp",
+    label: "WhatsApp usage limit",
+    control: "usageLimitList",
+    section: "Usage Limit",
+  },
+  {
+    jsonPointer: "/usage/limits/user_export",
+    label: "User export usage limit",
+    control: "usageLimitList",
+    section: "Usage Limit",
+  },
+  {
+    jsonPointer: "/usage/limits/user_import",
+    label: "User import usage limit",
+    control: "usageLimitList",
+    section: "Usage Limit",
+  },
+  {
+    jsonPointer: "/fraud_protection/is_modifiable",
+    label: "Fraud protection is modifiable",
+    control: "boolean",
+    section: "Fraud Protection",
   },
   {
     jsonPointer: "/messaging/custom_sms_provider_disabled",
@@ -121,9 +119,21 @@ export const FIELD_REGISTRY: FieldDef[] = [
     section: "Messaging",
   },
   {
-    jsonPointer: "/fraud_protection/is_modifiable",
-    label: "Fraud protection is modifiable",
-    control: "boolean",
-    section: "Fraud Protection",
+    jsonPointer: "/audit_log/retrieval_days",
+    label: "Audit log retrieval days",
+    control: "number",
+    section: "Audit Log",
+  },
+  {
+    jsonPointer: "/hook/blocking_handler/maximum",
+    label: "Maximum blocking hook handlers",
+    control: "number",
+    section: "Hook",
+  },
+  {
+    jsonPointer: "/hook/non_blocking_handler/maximum",
+    label: "Maximum non-blocking hook handlers",
+    control: "number",
+    section: "Hook",
   },
 ];

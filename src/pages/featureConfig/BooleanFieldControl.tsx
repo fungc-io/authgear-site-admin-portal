@@ -44,8 +44,8 @@ const BooleanFieldControl: React.VFC<BooleanFieldControlProps> =
           <Toggle
             className={styles.toggle}
             checked={value}
-            onText="Enabled"
-            offText="Disabled"
+            onText="Yes"
+            offText="No"
             disabled={disabled}
             onChange={onValueChange}
           />
