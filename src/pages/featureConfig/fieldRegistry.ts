@@ -37,10 +37,12 @@ export interface FieldDef {
  */
 export const SECTION_DESCRIPTIONS: Record<string, string> = {
   "Usage Limit":
-    "Block: stops further usage until the period resets; " +
-    "Alert: usage continues, and an email goes to the recipients configured " +
-    "in the project's usage.alerts config (a usage.alert-triggered webhook " +
-    "event also fires).",
+    "Block: stops further usage until the period resets. " +
+    "Alert: notify only; usage continues. " +
+    "Crossing either kind of rule sends an email to the recipients in the " +
+    "project's usage.alerts config, and fires a usage.alert-triggered event " +
+    "to the project's webhooks plus any usage.hooks webhooks in " +
+    "authgear.features.yaml.",
 };
 
 // Section order: most frequently adjusted settings first (per project owner).
